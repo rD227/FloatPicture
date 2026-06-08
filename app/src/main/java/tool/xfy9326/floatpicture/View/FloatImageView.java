@@ -16,6 +16,8 @@ public class FloatImageView extends AppCompatImageView {
     private boolean moveable = false;
     private boolean overLayout = false;
     private boolean fillScreen = false;
+    private boolean filterAppEnabled = false;
+    private String filterAppPackage = "";
 
     private float mTouchStartX = 0;
     private float mTouchStartY = 0;
@@ -62,6 +64,22 @@ public class FloatImageView extends AppCompatImageView {
 
     public boolean isFillScreen() {
         return fillScreen;
+    }
+
+    public void setFilterAppEnabled(boolean enabled) {
+        this.filterAppEnabled = enabled;
+    }
+
+    public boolean isFilterAppEnabled() {
+        return filterAppEnabled;
+    }
+
+    public void setFilterAppPackage(String packageName) {
+        this.filterAppPackage = packageName != null ? packageName : "";
+    }
+
+    public String getFilterAppPackage() {
+        return filterAppPackage;
     }
 
     @SuppressLint("ClickableViewAccessibility")

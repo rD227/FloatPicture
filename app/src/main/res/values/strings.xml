@@ -81,4 +81,13 @@
     <string name="settings_allow_picture_over_layout_sum">Show picture out of current window</string>
     <string name="settings_picture_fill_screen">Fill the screen</string>
     <string name="settings_picture_fill_screen_sum">Show the picture in full screen while maintaining aspect ratio.</string>
+    <string name="settings_picture_filter_app_enabled">Show only in specific app</string>
+    <string name="settings_picture_filter_app_enabled_sum">Only show this floating window when the selected app is in the foreground.</string>
+    <string name="settings_picture_filter_app">Select target app</string>
+    <string name="settings_picture_filter_app_sum">Choose which app to show this picture on.</string>
+    <string name="settings_picture_filter_app_none">None (disabled)</string>
+    <string name="settings_picture_filter_app_dialog_title">Select an app</string>
+    <string name="settings_usage_stats_permission_title">Usage Access Required</string>
+    <string name="settings_usage_stats_permission_message">To show the floating window only in specific apps, please grant usage access permission.</string>
+    <string name="settings_usage_stats_permission_grant">Grant Permission</string>
 </resources>

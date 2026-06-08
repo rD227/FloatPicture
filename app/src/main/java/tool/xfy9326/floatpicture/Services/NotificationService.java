@@ -11,7 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -30,9 +32,21 @@ import tool.xfy9326.floatpicture.View.ManageListAdapter;
 
 public class NotificationService extends Service {
     private static final String CHANNEL_ID = "channel_default";
+    private static final int FOREGROUND_CHECK_INTERVAL = 1500;
     private RemoteViews remoteViews;
     private NotificationCompat.Builder builder_manage;
     private NotificationButtonBroadcastReceiver notificationButtonBroadcastReceiver;
+    private Handler foregroundHandler;
+    private String lastForegroundPackage = "";
+    private final Runnable foregroundChecker = new Runnable() {
+        @Override
+        public void run() {
+            checkForegroundApp();
+            if (foregroundHandler != null) {
+                foregroundHandler.postDelayed(this, FOREGROUND_CHECK_INTERVAL);
+            }
+        }
+    };
 
     private static void createNotificationChannel(@NonNull Context context, @NonNull NotificationManagerCompat notificationManager) {
         if (Build.VERSION.SDK_INT >= 26) {
@@ -64,6 +78,10 @@ public class NotificationService extends Service {
             builder_manage = createNotification();
             startForeground(Config.NOTIFICATION_ID, builder_manage.build());
         }
+        if (foregroundHandler == null) {
+            foregroundHandler = new Handler(Looper.getMainLooper());
+            foregroundHandler.post(foregroundChecker);
+        }
     }
 
     @Nullable
@@ -75,6 +93,10 @@ public class NotificationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (foregroundHandler != null) {
+            foregroundHandler.removeCallbacks(foregroundChecker);
+            foregroundHandler = null;
+        }
         if (notificationButtonBroadcastReceiver != null) {
             unregisterReceiver(notificationButtonBroadcastReceiver);
             notificationButtonBroadcastReceiver = null;
@@ -115,6 +137,15 @@ public class NotificationService extends Service {
 
         builder.setContent(remoteViews);
         return builder;
+    }
+
+    private void checkForegroundApp() {
+        if (!ManageMethods.hasUsageStatsPermission(this)) return;
+        String fgPkg = ManageMethods.getForegroundPackage(this);
+        if (fgPkg != null && !fgPkg.equals(lastForegroundPackage)) {
+            lastForegroundPackage = fgPkg;
+            ManageMethods.updateWindowsForForegroundApp(this, fgPkg);
+        }
     }
 
     private class NotificationButtonBroadcastReceiver extends BroadcastReceiver {

@@ -1,5 +1,6 @@
 package tool.xfy9326.floatpicture.View;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -58,6 +59,9 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
     private int position_y_temp;
     private boolean allow_picture_over_layout;
     private boolean fill_screen;
+    private boolean filter_app_enabled;
+    private String filter_app_package;
+    private String filter_app_name;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,6 +124,9 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
                     allow_picture_over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT);
                     fill_screen = pictureData.getBoolean(Config.DATA_PICTURE_FILL_SCREEN, Config.DATA_DEFAULT_PICTURE_FILL_SCREEN);
+                    filter_app_enabled = pictureData.getBoolean(Config.DATA_PICTURE_FILTER_APP_ENABLED, Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED);
+                    filter_app_package = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_PACKAGE, Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE);
+                    filter_app_name = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_NAME, Config.DATA_DEFAULT_PICTURE_FILTER_APP_NAME);
                     bitmap = ImageMethods.getShowBitmap(requireContext(), PictureId);
                     default_zoom = ImageMethods.getDefaultZoom(requireContext(), bitmap, false);
                     zoom = pictureData.getFloat(Config.DATA_PICTURE_ZOOM, default_zoom);
@@ -136,6 +143,9 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     touch_and_move = Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE;
                     allow_picture_over_layout = Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT;
                     fill_screen = Config.DATA_DEFAULT_PICTURE_FILL_SCREEN;
+                    filter_app_enabled = Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED;
+                    filter_app_package = Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE;
+                    filter_app_name = Config.DATA_DEFAULT_PICTURE_FILTER_APP_NAME;
                     bitmap = ImageMethods.getShowBitmap(requireContext(), PictureId);
                     default_zoom = ImageMethods.getDefaultZoom(requireContext(), bitmap, false);
                     zoom = default_zoom;
@@ -200,6 +210,20 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             setPicturePosition();
             return true;
         });
+        CheckBoxPreference preference_filter_app = findPreference(Config.PREFERENCE_PICTURE_FILTER_APP_ENABLED);
+        assert preference_filter_app != null;
+        preference_filter_app.setChecked(filter_app_enabled);
+        preference_filter_app.setOnPreferenceChangeListener((preference, newValue) -> {
+            setPictureFilterAppEnabled((boolean) newValue);
+            return true;
+        });
+        Preference preference_select_app = findPreference(Config.PREFERENCE_PICTURE_FILTER_APP);
+        assert preference_select_app != null;
+        updateFilterAppSummary(preference_select_app);
+        preference_select_app.setOnPreferenceClickListener(preference -> {
+            selectFilterApp(preference);
+            return true;
+        });
     }
 
     private void setAllowPictureOverLayout(boolean allow) {
@@ -219,6 +243,91 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             floatImageView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, picture_degree));
         }
         WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow_picture_over_layout, position_x, position_y);
+    }
+
+    private void setPictureFilterAppEnabled(boolean enabled) {
+        filter_app_enabled = enabled;
+        floatImageView.setFilterAppEnabled(enabled);
+        if (!enabled) {
+            filter_app_package = "";
+            filter_app_name = "";
+            floatImageView.setFilterAppPackage("");
+        }
+        Preference preference_select_app = findPreference(Config.PREFERENCE_PICTURE_FILTER_APP);
+        if (preference_select_app != null) {
+            updateFilterAppSummary(preference_select_app);
+        }
+    }
+
+    private void updateFilterAppSummary(Preference preference) {
+        if (filter_app_enabled && !filter_app_package.isEmpty()) {
+            preference.setSummary(filter_app_name);
+        } else if (filter_app_enabled) {
+            preference.setSummary(getString(R.string.settings_picture_filter_app_sum));
+        } else {
+            preference.setSummary(getString(R.string.settings_picture_filter_app_none));
+        }
+    }
+
+    private void selectFilterApp(Preference preference) {
+        if (!hasUsageStatsPermission()) {
+            requestUsageStatsPermission();
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        java.util.List<android.content.pm.ResolveInfo> apps = requireActivity().getPackageManager().queryIntentActivities(intent, 0);
+        java.util.ArrayList<AppItem> appList = new java.util.ArrayList<>();
+        for (android.content.pm.ResolveInfo resolveInfo : apps) {
+            String pkg = resolveInfo.activityInfo.packageName;
+            String name = resolveInfo.loadLabel(requireActivity().getPackageManager()).toString();
+            if (!pkg.equals(requireActivity().getPackageName())) {
+                appList.add(new AppItem(pkg, name));
+            }
+        }
+        java.util.Collections.sort(appList, (a, b) -> a.name.compareToIgnoreCase(b.name));
+        String[] names = new String[appList.size()];
+        for (int i = 0; i < appList.size(); i++) {
+            names[i] = appList.get(i).name;
+        }
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.settings_picture_filter_app_dialog_title)
+                .setItems(names, (dialog, which) -> {
+                    filter_app_package = appList.get(which).packageName;
+                    filter_app_name = appList.get(which).name;
+                    floatImageView.setFilterAppPackage(filter_app_package);
+                    updateFilterAppSummary(preference);
+                })
+                .show();
+    }
+
+    private boolean hasUsageStatsPermission() {
+        android.app.AppOpsManager appOps = (android.app.AppOpsManager) requireActivity().getSystemService(Context.APP_OPS_SERVICE);
+        if (appOps == null) return false;
+        int mode = appOps.checkOpNoThrow(android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(), requireActivity().getPackageName());
+        return mode == android.app.AppOpsManager.MODE_ALLOWED;
+    }
+
+    private void requestUsageStatsPermission() {
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.settings_usage_stats_permission_title)
+                .setMessage(R.string.settings_usage_stats_permission_message)
+                .setPositiveButton(R.string.settings_usage_stats_permission_grant, (dialog, which) -> {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                    startActivity(intent);
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private static class AppItem {
+        final String packageName;
+        final String name;
+        AppItem(String packageName, String name) {
+            this.packageName = packageName;
+            this.name = name;
+        }
     }
 
     private void setPictureTouchAndMove(boolean touchable_and_moveable) {
@@ -623,6 +732,9 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         pictureData.put(Config.DATA_PICTURE_TOUCH_AND_MOVE, touch_and_move);
         pictureData.put(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, allow_picture_over_layout);
         pictureData.put(Config.DATA_PICTURE_FILL_SCREEN, fill_screen);
+        pictureData.put(Config.DATA_PICTURE_FILTER_APP_ENABLED, filter_app_enabled);
+        pictureData.put(Config.DATA_PICTURE_FILTER_APP_PACKAGE, filter_app_package);
+        pictureData.put(Config.DATA_PICTURE_FILTER_APP_NAME, filter_app_name);
         pictureData.commit(PictureName);
         WindowsMethods.updateWindow(windowManager, floatImageView, bitmap, touch_and_move, allow_picture_over_layout, zoom, picture_degree, position_x, position_y);
         ImageMethods.saveFloatImageViewById(requireActivity(), PictureId, floatImageView);
@@ -653,10 +765,15 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             boolean original_allow_picture_over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, allow_picture_over_layout);
             boolean original_touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
             boolean original_fill_screen = pictureData.getBoolean(Config.DATA_PICTURE_FILL_SCREEN, Config.DATA_DEFAULT_PICTURE_FILL_SCREEN);
+            boolean original_filter_app_enabled = pictureData.getBoolean(Config.DATA_PICTURE_FILTER_APP_ENABLED, Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED);
+            String original_filter_app_package = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_PACKAGE, Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE);
+            String original_filter_app_name = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_NAME, Config.DATA_DEFAULT_PICTURE_FILTER_APP_NAME);
             floatImageView.setAlpha(original_alpha);
             floatImageView.setOverLayout(original_allow_picture_over_layout);
             floatImageView.setMoveable(original_touch_and_move);
             floatImageView.setFillScreen(original_fill_screen);
+            floatImageView.setFilterAppEnabled(original_filter_app_enabled);
+            floatImageView.setFilterAppPackage(original_filter_app_package);
             WindowsMethods.updateWindow(windowManager, floatImageView, bitmap, original_touch_and_move, original_allow_picture_over_layout, original_zoom, original_degree, original_position_x, original_position_y);
         }
 

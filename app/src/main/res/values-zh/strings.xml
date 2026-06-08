@@ -82,4 +82,13 @@
     <string name="settings_allow_picture_over_layout_sum">悬浮窗可以超出当前可显示的屏幕外</string>
     <string name="settings_picture_fill_screen">填充全屏</string>
     <string name="settings_picture_fill_screen_sum">图片填充整个屏幕，保持宽高比（非拉伸）</string>
+    <string name="settings_picture_filter_app_enabled">仅在指定应用显示</string>
+    <string name="settings_picture_filter_app_enabled_sum">仅当选择的应用程序在前台时才显示此悬浮窗。</string>
+    <string name="settings_picture_filter_app">选择目标应用</string>
+    <string name="settings_picture_filter_app_sum">选择要在哪个应用上显示此图片。</string>
+    <string name="settings_picture_filter_app_none">无（已禁用）</string>
+    <string name="settings_picture_filter_app_dialog_title">选择应用</string>
+    <string name="settings_usage_stats_permission_title">需要使用情况访问权限</string>
+    <string name="settings_usage_stats_permission_message">要在特定应用中显示悬浮窗，请授予使用情况访问权限。</string>
+    <string name="settings_usage_stats_permission_grant">授予权限</string>
 </resources>

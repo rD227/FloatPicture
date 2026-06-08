@@ -4,14 +4,20 @@ package tool.xfy9326.floatpicture.Methods;
 import static tool.xfy9326.floatpicture.Methods.WindowsMethods.getWindowManager;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
+import android.os.Process;
 import android.view.View;
 import android.view.WindowManager;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import tool.xfy9326.floatpicture.MainApplication;
@@ -59,6 +65,10 @@ public class ManageMethods {
             floatImageView.setFillScreen(true);
             floatImageView.setImageBitmap(bitmap);
         }
+        boolean filter_app_enabled = pictureData.getBoolean(Config.DATA_PICTURE_FILTER_APP_ENABLED, Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED);
+        String filter_app_package = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_PACKAGE, Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE);
+        floatImageView.setFilterAppEnabled(filter_app_enabled);
+        floatImageView.setFilterAppPackage(filter_app_package);
         floatImageView.setAlpha(picture_alpha);
         ImageMethods.saveFloatImageViewById(mContext, id, floatImageView);
         if (pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED)) {
@@ -114,7 +124,7 @@ public class ManageMethods {
         pictureData.setDataControl(id);
         boolean data_visible = pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, visible);
         if (visible) {
-            if (!data_visible) {
+            if (!data_visible && shouldShowFilteredWindow(context, pictureData, id)) {
                 showWindowById(context, id);
                 pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, true);
                 pictureData.commit(null);
@@ -128,12 +138,22 @@ public class ManageMethods {
         }
     }
 
+    private static boolean shouldShowFilteredWindow(Context context, PictureData pictureData, String id) {
+        boolean filterEnabled = pictureData.getBoolean(Config.DATA_PICTURE_FILTER_APP_ENABLED, Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED);
+        if (!filterEnabled) return true;
+        if (!hasUsageStatsPermission(context)) return true;
+        String filterPackage = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_PACKAGE, Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE);
+        if (filterPackage.isEmpty()) return true;
+        String fgPkg = getForegroundPackage(context);
+        return filterPackage.equals(fgPkg);
+    }
+
     private static void hideWindowById(Context mContext, String id) {
         FloatImageView floatImageView = ImageMethods.getFloatImageViewById(mContext, id);
         getWindowManager(mContext).removeView(floatImageView);
     }
 
-    private static void showWindowById(Context mContext, String id) {
+    static void showWindowById(Context mContext, String id) {
         FloatImageView floatImageView = ImageMethods.getFloatImageViewById(mContext, id);
         PictureData pictureData = new PictureData();
         pictureData.setDataControl(id);
@@ -143,6 +163,56 @@ public class ManageMethods {
         boolean over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT);
         WindowManager.LayoutParams layoutParams = WindowsMethods.getDefaultLayout(floatImageView, positionX, positionY, touch_and_move, over_layout);
         getWindowManager(mContext).addView(floatImageView, layoutParams);
+    }
+
+    public static String getForegroundPackage(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return null;
+        UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        if (usm == null) return null;
+        long endTime = System.currentTimeMillis();
+        long beginTime = endTime - 5000;
+        List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, beginTime, endTime);
+        if (stats != null && !stats.isEmpty()) {
+            stats.sort((a, b) -> Long.compare(b.getLastTimeUsed(), a.getLastTimeUsed()));
+            return stats.get(0).getPackageName();
+        }
+        return null;
+    }
+
+    public static boolean hasUsageStatsPermission(Context context) {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        if (appOps == null) return false;
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(), context.getPackageName());
+        return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    public static void updateWindowsForForegroundApp(Context context, String foregroundPackage) {
+        MainApplication mainApplication = (MainApplication) context.getApplicationContext();
+        HashMap<String, View> views = mainApplication.getRegister();
+        PictureData pictureData = new PictureData();
+        for (Map.Entry<String, View> entry : views.entrySet()) {
+            String id = entry.getKey();
+            View view = entry.getValue();
+            if (view instanceof FloatImageView) {
+                FloatImageView floatImageView = (FloatImageView) view;
+                if (floatImageView.isFilterAppEnabled()) {
+                    String filterPackage = floatImageView.getFilterAppPackage();
+                    boolean shouldShow = filterPackage.equals(foregroundPackage);
+                    pictureData.setDataControl(id);
+                    boolean isShown = pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED);
+                    if (shouldShow && !isShown && mainApplication.getWinVisible()) {
+                        showWindowById(context, id);
+                        pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, true);
+                        pictureData.commit(null);
+                    } else if (!shouldShow && isShown) {
+                        hideWindowById(context, id);
+                        pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, false);
+                        pictureData.commit(null);
+                    }
+                }
+            }
+        }
     }
 
 }
