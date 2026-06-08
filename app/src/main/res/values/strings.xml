@@ -79,4 +79,6 @@
     <string name="notification_channel_des">Default Notification</string>
     <string name="settings_allow_picture_over_layout">Allow picture over layout</string>
     <string name="settings_allow_picture_over_layout_sum">Show picture out of current window</string>
+    <string name="settings_picture_fill_screen">Fill the screen</string>
+    <string name="settings_picture_fill_screen_sum">Show the picture in full screen while maintaining aspect ratio.</string>
 </resources>

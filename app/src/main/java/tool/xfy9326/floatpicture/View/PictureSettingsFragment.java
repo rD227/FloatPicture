@@ -57,6 +57,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
     private int position_x_temp;
     private int position_y_temp;
     private boolean allow_picture_over_layout;
+    private boolean fill_screen;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,6 +119,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     picture_alpha = pictureData.getFloat(Config.DATA_PICTURE_ALPHA, Config.DATA_DEFAULT_PICTURE_ALPHA);
                     touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
                     allow_picture_over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT);
+                    fill_screen = pictureData.getBoolean(Config.DATA_PICTURE_FILL_SCREEN, Config.DATA_DEFAULT_PICTURE_FILL_SCREEN);
                     bitmap = ImageMethods.getShowBitmap(requireContext(), PictureId);
                     default_zoom = ImageMethods.getDefaultZoom(requireContext(), bitmap, false);
                     zoom = pictureData.getFloat(Config.DATA_PICTURE_ZOOM, default_zoom);
@@ -133,6 +135,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     picture_degree = Config.DATA_DEFAULT_PICTURE_DEGREE;
                     touch_and_move = Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE;
                     allow_picture_over_layout = Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT;
+                    fill_screen = Config.DATA_DEFAULT_PICTURE_FILL_SCREEN;
                     bitmap = ImageMethods.getShowBitmap(requireContext(), PictureId);
                     default_zoom = ImageMethods.getDefaultZoom(requireContext(), bitmap, false);
                     zoom = default_zoom;
@@ -186,6 +189,13 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             setAllowPictureOverLayout((boolean) newValue);
             return true;
         });
+        CheckBoxPreference preference_fill_screen = findPreference(Config.PREFERENCE_PICTURE_FILL_SCREEN);
+        assert preference_fill_screen != null;
+        preference_fill_screen.setChecked(fill_screen);
+        preference_fill_screen.setOnPreferenceChangeListener((preference, newValue) -> {
+            setPictureFillScreen((boolean) newValue);
+            return true;
+        });
         requirePreference(Config.PREFERENCE_PICTURE_POSITION).setOnPreferenceClickListener(preference -> {
             setPicturePosition();
             return true;
@@ -197,6 +207,18 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         windowManager.removeView(floatImageView);
         floatImageView.setOverLayout(allow_picture_over_layout);
         WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow, position_x, position_y);
+    }
+
+    private void setPictureFillScreen(boolean fill) {
+        fill_screen = fill;
+        floatImageView.setFillScreen(fill);
+        windowManager.removeView(floatImageView);
+        if (fill) {
+            floatImageView.setImageBitmap(bitmap);
+        } else {
+            floatImageView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, picture_degree));
+        }
+        WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow_picture_over_layout, position_x, position_y);
     }
 
     private void setPictureTouchAndMove(boolean touchable_and_moveable) {
@@ -566,7 +588,11 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             windowManager.removeView(floatImageView_Edit);
             floatImageView_Edit.refreshDrawableState();
             bitmap_Edit.recycle();
-            floatImageView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, picture_degree));
+            if (fill_screen) {
+                floatImageView.setImageBitmap(bitmap);
+            } else {
+                floatImageView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, picture_degree));
+            }
             WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow_picture_over_layout, position_x, position_y);
             onUseEditPicture = false;
         }
@@ -596,6 +622,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         pictureData.put(Config.DATA_PICTURE_DEGREE, picture_degree);
         pictureData.put(Config.DATA_PICTURE_TOUCH_AND_MOVE, touch_and_move);
         pictureData.put(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, allow_picture_over_layout);
+        pictureData.put(Config.DATA_PICTURE_FILL_SCREEN, fill_screen);
         pictureData.commit(PictureName);
         WindowsMethods.updateWindow(windowManager, floatImageView, bitmap, touch_and_move, allow_picture_over_layout, zoom, picture_degree, position_x, position_y);
         ImageMethods.saveFloatImageViewById(requireActivity(), PictureId, floatImageView);
@@ -625,9 +652,11 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             int original_position_y = pictureData.getInt(Config.DATA_PICTURE_POSITION_Y, position_y);
             boolean original_allow_picture_over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, allow_picture_over_layout);
             boolean original_touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
+            boolean original_fill_screen = pictureData.getBoolean(Config.DATA_PICTURE_FILL_SCREEN, Config.DATA_DEFAULT_PICTURE_FILL_SCREEN);
             floatImageView.setAlpha(original_alpha);
             floatImageView.setOverLayout(original_allow_picture_over_layout);
             floatImageView.setMoveable(original_touch_and_move);
+            floatImageView.setFillScreen(original_fill_screen);
             WindowsMethods.updateWindow(windowManager, floatImageView, bitmap, original_touch_and_move, original_allow_picture_over_layout, original_zoom, original_degree, original_position_x, original_position_y);
         }
 

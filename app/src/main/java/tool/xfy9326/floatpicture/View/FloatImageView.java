@@ -15,6 +15,7 @@ public class FloatImageView extends AppCompatImageView {
     private WindowManager windowManager;
     private boolean moveable = false;
     private boolean overLayout = false;
+    private boolean fillScreen = false;
 
     private float mTouchStartX = 0;
     private float mTouchStartY = 0;
@@ -48,6 +49,19 @@ public class FloatImageView extends AppCompatImageView {
 
     public void setOverLayout(boolean overLayout) {
         this.overLayout = overLayout;
+    }
+
+    public void setFillScreen(boolean fillScreen) {
+        this.fillScreen = fillScreen;
+        if (fillScreen) {
+            setScaleType(ScaleType.CENTER_CROP);
+        } else {
+            setScaleType(ScaleType.MATRIX);
+        }
+    }
+
+    public boolean isFillScreen() {
+        return fillScreen;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -89,7 +103,7 @@ public class FloatImageView extends AppCompatImageView {
     }
 
     private void updatePosition() {
-        windowManager.updateViewLayout(this, WindowsMethods.getDefaultLayout(getContext(), (int) mNowPositionX, (int) mNowPositionY, moveable, overLayout));
+        windowManager.updateViewLayout(this, WindowsMethods.getDefaultLayout(this, (int) mNowPositionX, (int) mNowPositionY, moveable, overLayout));
     }
 
 }

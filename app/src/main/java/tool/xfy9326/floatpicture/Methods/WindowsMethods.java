@@ -20,11 +20,13 @@ public class WindowsMethods {
 
     @SuppressWarnings("SameParameterValue")
     public static void createWindow(WindowManager windowManager, View pictureView, boolean touchable, boolean overLayout, int layoutPositionX, int layoutPositionY) {
-        WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView.getContext(), layoutPositionX, layoutPositionY, touchable, overLayout);
+        WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView, layoutPositionX, layoutPositionY, touchable, overLayout);
         windowManager.addView(pictureView, layoutParams);
     }
 
-    public static WindowManager.LayoutParams getDefaultLayout(Context context, int layoutPositionX, int layoutPositionY, boolean touchable, boolean overLayout) {
+    public static WindowManager.LayoutParams getDefaultLayout(View pictureView, int layoutPositionX, int layoutPositionY, boolean touchable, boolean overLayout) {
+        Context context = pictureView.getContext();
+        boolean fillScreen = (pictureView instanceof FloatImageView) && ((FloatImageView) pictureView).isFillScreen();
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -40,11 +42,18 @@ public class WindowsMethods {
         if (!touchable) {
             layoutParams.flags = layoutParams.flags | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
-        layoutParams.x = layoutPositionX;
-        layoutParams.y = layoutPositionY;
+        if (fillScreen) {
+            layoutParams.x = 0;
+            layoutParams.y = 0;
+            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+            layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        } else {
+            layoutParams.x = layoutPositionX;
+            layoutParams.y = layoutPositionY;
+            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        }
         layoutParams.gravity = Gravity.START | Gravity.TOP;
-        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.format = PixelFormat.TRANSLUCENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             layoutParams.alpha = ((MainApplication) context.getApplicationContext()).getSafeWindowsAlpha();
@@ -53,13 +62,17 @@ public class WindowsMethods {
     }
 
     public static void updateWindow(WindowManager windowManager, FloatImageView pictureView, boolean touchable, boolean overLayout, int layoutPositionX, int layoutPositionY) {
-        WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView.getContext(), layoutPositionX, layoutPositionY, touchable, overLayout);
+        WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView, layoutPositionX, layoutPositionY, touchable, overLayout);
         windowManager.updateViewLayout(pictureView, layoutParams);
     }
 
     public static void updateWindow(WindowManager windowManager, FloatImageView pictureView, Bitmap bitmap, boolean touchable, boolean overLayout, float zoom, float degree, int layoutPositionX, int layoutPositionY) {
         pictureView.refreshDrawableState();
-        pictureView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, degree));
+        if (pictureView.isFillScreen()) {
+            pictureView.setImageBitmap(bitmap);
+        } else {
+            pictureView.setImageBitmap(ImageMethods.resizeBitmap(bitmap, zoom, degree));
+        }
         updateWindow(windowManager, pictureView, touchable, overLayout, layoutPositionX, layoutPositionY);
     }
 }

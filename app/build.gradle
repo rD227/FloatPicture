@@ -10,7 +10,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
         versionCode 12
-        versionName "1.9.2"
+        versionName "1.9.9"
 
         resourceConfigurations.add("zh")
 

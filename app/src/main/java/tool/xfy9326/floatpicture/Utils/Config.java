@@ -29,6 +29,7 @@ public class Config {
     public final static String DATA_PICTURE_DEGREE = "DEGREE";
     public final static String DATA_PICTURE_TOUCH_AND_MOVE = "TOUCH_AND_MOVE";
     public final static String DATA_ALLOW_PICTURE_OVER_LAYOUT = "ALLOW_PICTURE_OVER_LAYOUT";
+    public final static String DATA_PICTURE_FILL_SCREEN = "FILL_SCREEN";
 
     public final static boolean DATA_DEFAULT_PICTURE_SHOW_ENABLED = true;
     public final static int DATA_DEFAULT_PICTURE_POSITION_X = 100;
@@ -37,6 +38,7 @@ public class Config {
     public final static float DATA_DEFAULT_PICTURE_DEGREE = 0f;
     public final static boolean DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE = false;
     public final static boolean DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT = false;
+    public final static boolean DATA_DEFAULT_PICTURE_FILL_SCREEN = false;
 
     public final static String PREFERENCE_PICTURE_NAME = "settings_picture_name";
     public final static String PREFERENCE_ALLOW_PICTURE_OVER_LAYOUT = "settings_allow_picture_over_layout";
@@ -45,6 +47,7 @@ public class Config {
     public final static String PREFERENCE_PICTURE_POSITION = "settings_picture_position";
     public final static String PREFERENCE_PICTURE_DEGREE = "settings_picture_degree";
     public final static String PREFERENCE_PICTURE_TOUCH_AND_MOVE = "settings_picture_touchable_and_moveable";
+    public final static String PREFERENCE_PICTURE_FILL_SCREEN = "settings_picture_fill_screen";
 
     public final static String PREFERENCE_BOOT_AUTO_RUN = "boot_auto_run";
     public final static String PREFERENCE_SHOW_NOTIFICATION_CONTROL = "show_notification_control";

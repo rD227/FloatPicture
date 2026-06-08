@@ -64,5 +64,12 @@
             app:singleLine="true"
             app:summary="@string/settings_allow_picture_over_layout_sum"
             app:title="@string/settings_allow_picture_over_layout" />
+        <CheckBoxPreference
+            android:selectAllOnFocus="true"
+            app:iconSpaceReserved="false"
+            app:key="settings_picture_fill_screen"
+            app:singleLine="true"
+            app:summary="@string/settings_picture_fill_screen_sum"
+            app:title="@string/settings_picture_fill_screen" />
     </PreferenceCategory>
 </PreferenceScreen>

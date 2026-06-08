@@ -80,4 +80,6 @@
     <string name="notification_channel_des">默认通知</string>
     <string name="settings_allow_picture_over_layout">允许悬浮窗超出屏幕</string>
     <string name="settings_allow_picture_over_layout_sum">悬浮窗可以超出当前可显示的屏幕外</string>
+    <string name="settings_picture_fill_screen">填充全屏</string>
+    <string name="settings_picture_fill_screen_sum">图片填充整个屏幕，保持宽高比（非拉伸）</string>
 </resources>
