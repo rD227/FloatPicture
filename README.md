@@ -1,6 +1,6 @@
 # FloatPicture
 
-[![codebeat badge](https://codebeat.co/badges/b1b7bd81-7e45-487e-ad8b-539a71df2f09)](https://codebeat.co/projects/github-com-xfy9326-floatpicture-master)
+~~[![codebeat badge](https://codebeat.co/badges/b1b7bd81-7e45-487e-ad8b-539a71df2f09)](https://codebeat.co/projects/github-com-xfy9326-floatpicture-master)~~
 
 [中文说明](README_CN.md)
 
