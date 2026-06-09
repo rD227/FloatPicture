@@ -60,12 +60,6 @@ UsageEvents events = usm.queryEvents(beginTime, endTime);
 // 遍历事件，找到最近的 MOVE_TO_FOREGROUND 事件
 ```
 
-**为什么用 `queryEvents` 而不是 `queryUsageStats`？**
-- `queryUsageStats` 返回按天聚合的统计数据，系统批量更新，从最近任务切换时可能有延迟
-- `queryEvents` 的 `MOVE_TO_FOREGROUND` 事件直接反映应用前后台切换，实时性更好
-
-`NotificationService`（前台服务）每 1.5 秒轮询一次，检测到前台应用变化时自动显示/隐藏匹配的窗口。
-
 **所需权限：** `PACKAGE_USAGE_STATS` — 用户在 设置 → 使用情况访问权限 中授予。
 
 ---
