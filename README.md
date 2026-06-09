@@ -6,12 +6,7 @@
 
 ---
 
-<table align="center">
-  <tr>
-    <td align="center"><img src="picture/Screenshot_2026-06-09-13-47-32-71_84d3000e3f40171.jpg" alt="termux"/></td>
-    <td align="center"><img src="picture/Screenshot_2026-06-09-13-48-08-15_c6fe46394dc5d32.jpg" alt="settings"/></td>
-  </tr>
-</table>
+<img src="picture/Screenshot_2026-06-09-13-47-32-71_84d3000e3f40171.jpg" alt="termux" width="48%" /><img src="picture/Screenshot_2026-06-09-13-48-08-15_c6fe46394dc5d32.jpg" alt="settings" width="48%" />
 
 **some problems**
 
