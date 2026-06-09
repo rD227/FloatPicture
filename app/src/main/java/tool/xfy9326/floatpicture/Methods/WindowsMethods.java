@@ -63,7 +63,11 @@ public class WindowsMethods {
 
     public static void updateWindow(WindowManager windowManager, FloatImageView pictureView, boolean touchable, boolean overLayout, int layoutPositionX, int layoutPositionY) {
         WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView, layoutPositionX, layoutPositionY, touchable, overLayout);
-        windowManager.updateViewLayout(pictureView, layoutParams);
+        if (pictureView.isAttachedToWindow()) {
+            windowManager.updateViewLayout(pictureView, layoutParams);
+        } else {
+            windowManager.addView(pictureView, layoutParams);
+        }
     }
 
     public static void updateWindow(WindowManager windowManager, FloatImageView pictureView, Bitmap bitmap, boolean touchable, boolean overLayout, float zoom, float degree, int layoutPositionX, int layoutPositionY) {

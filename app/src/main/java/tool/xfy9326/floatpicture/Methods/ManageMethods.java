@@ -5,6 +5,7 @@ import static tool.xfy9326.floatpicture.Methods.WindowsMethods.getWindowManager;
 
 import android.app.Activity;
 import android.app.AppOpsManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -170,10 +171,12 @@ public class ManageMethods {
         UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         if (usm == null) return null;
         long endTime = System.currentTimeMillis();
-        long beginTime = endTime - 5000;
+        long beginTime = endTime - 1000;
         List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, beginTime, endTime);
         if (stats != null && !stats.isEmpty()) {
-            stats.sort((a, b) -> Long.compare(b.getLastTimeUsed(), a.getLastTimeUsed()));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stats.sort((a, b) -> Long.compare(b.getLastTimeUsed(), a.getLastTimeUsed()));
+            }
             return stats.get(0).getPackageName();
         }
         return null;
