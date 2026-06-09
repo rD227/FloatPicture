@@ -18,10 +18,19 @@ public class WindowsMethods {
         return (WindowManager) mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
     }
 
-    @SuppressWarnings("SameParameterValue")
     public static void createWindow(WindowManager windowManager, View pictureView, boolean touchable, boolean overLayout, int layoutPositionX, int layoutPositionY) {
         WindowManager.LayoutParams layoutParams = getDefaultLayout(pictureView, layoutPositionX, layoutPositionY, touchable, overLayout);
-        windowManager.addView(pictureView, layoutParams);
+        if (pictureView.isAttachedToWindow()) {
+            windowManager.updateViewLayout(pictureView, layoutParams);
+        } else {
+            windowManager.addView(pictureView, layoutParams);
+        }
+    }
+
+    public static void safeRemoveView(WindowManager windowManager, View view) {
+        if (view != null && view.isAttachedToWindow()) {
+            windowManager.removeView(view);
+        }
     }
 
     public static WindowManager.LayoutParams getDefaultLayout(View pictureView, int layoutPositionX, int layoutPositionY, boolean touchable, boolean overLayout) {

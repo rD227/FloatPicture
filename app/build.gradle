@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "tool.xfy9326.floatpicture"
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "tool.xfy9326.floatpicture"

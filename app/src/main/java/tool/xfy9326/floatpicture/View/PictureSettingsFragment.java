@@ -228,7 +228,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
 
     private void setAllowPictureOverLayout(boolean allow) {
         allow_picture_over_layout = allow;
-        windowManager.removeView(floatImageView);
+        WindowsMethods.safeRemoveView(windowManager, floatImageView);
         floatImageView.setOverLayout(allow_picture_over_layout);
         WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow, position_x, position_y);
     }
@@ -236,7 +236,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
     private void setPictureFillScreen(boolean fill) {
         fill_screen = fill;
         floatImageView.setFillScreen(fill);
-        windowManager.removeView(floatImageView);
+        WindowsMethods.safeRemoveView(windowManager, floatImageView);
         if (fill) {
             floatImageView.setImageBitmap(bitmap);
         } else {
@@ -348,7 +348,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
 
     private void setPictureTouchAndMove(boolean touchable_and_moveable) {
         touch_and_move = touchable_and_moveable;
-        windowManager.removeView(floatImageView);
+        WindowsMethods.safeRemoveView(windowManager, floatImageView);
         floatImageView.setMoveable(touchable_and_moveable);
         WindowsMethods.createWindow(windowManager, floatImageView, touchable_and_moveable, allow_picture_over_layout, position_x, position_y);
     }
@@ -701,7 +701,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
 
     private void onEditPicture(FloatImageView FloatImageView_Edit) {
         if (!onUseEditPicture) {
-            windowManager.removeView(floatImageView);
+            WindowsMethods.safeRemoveView(windowManager, floatImageView);
             floatImageView.refreshDrawableState();
             WindowsMethods.createWindow(windowManager, FloatImageView_Edit, touch_and_move, allow_picture_over_layout, position_x, position_y);
             onUseEditPicture = true;
@@ -710,7 +710,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
 
     private void onSuccessEditPicture(FloatImageView floatImageView_Edit, Bitmap bitmap_Edit) {
         if (onUseEditPicture) {
-            windowManager.removeView(floatImageView_Edit);
+            WindowsMethods.safeRemoveView(windowManager, floatImageView_Edit);
             floatImageView_Edit.refreshDrawableState();
             bitmap_Edit.recycle();
             if (fill_screen) {
@@ -725,7 +725,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
 
     private void onFailedEditPicture(FloatImageView floatImageView_Edit, Bitmap bitmap_Edit) {
         if (onUseEditPicture) {
-            windowManager.removeView(floatImageView_Edit);
+            WindowsMethods.safeRemoveView(windowManager, floatImageView_Edit);
             floatImageView_Edit.refreshDrawableState();
             bitmap_Edit.recycle();
             WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, allow_picture_over_layout, position_x, position_y);
@@ -767,7 +767,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
     public void exit() {
         if (!Edit_Mode) {
             if (floatImageView != null) {
-                windowManager.removeView(floatImageView);
+                WindowsMethods.safeRemoveView(windowManager, floatImageView);
                 bitmap.recycle();
                 floatImageView = null;
             }

@@ -83,7 +83,7 @@ public class ManageMethods {
         if (pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED)) {
             FloatImageView floatImageView = ImageMethods.getFloatImageViewById(mContext, id);
             if (floatImageView != null) {
-                getWindowManager(mContext).removeView(floatImageView);
+                WindowsMethods.safeRemoveView(getWindowManager(mContext), floatImageView);
                 floatImageView.refreshDrawableState();
             }
         }
@@ -100,7 +100,7 @@ public class ManageMethods {
                 pictureData.setDataControl(entry.getKey().toString());
                 if (pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED)) {
                     FloatImageView floatImageView = (FloatImageView) entry.getValue();
-                    windowManager.removeView(floatImageView);
+                    WindowsMethods.safeRemoveView(windowManager, floatImageView);
                     floatImageView.refreshDrawableState();
                 }
             }
@@ -151,7 +151,7 @@ public class ManageMethods {
 
     private static void hideWindowById(Context mContext, String id) {
         FloatImageView floatImageView = ImageMethods.getFloatImageViewById(mContext, id);
-        getWindowManager(mContext).removeView(floatImageView);
+        WindowsMethods.safeRemoveView(getWindowManager(mContext), floatImageView);
     }
 
     static void showWindowById(Context mContext, String id) {
@@ -163,7 +163,11 @@ public class ManageMethods {
         boolean touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
         boolean over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT);
         WindowManager.LayoutParams layoutParams = WindowsMethods.getDefaultLayout(floatImageView, positionX, positionY, touch_and_move, over_layout);
-        getWindowManager(mContext).addView(floatImageView, layoutParams);
+        if (floatImageView.isAttachedToWindow()) {
+            getWindowManager(mContext).updateViewLayout(floatImageView, layoutParams);
+        } else {
+            getWindowManager(mContext).addView(floatImageView, layoutParams);
+        }
     }
 
     public static String getForegroundPackage(Context context) {
@@ -171,15 +175,21 @@ public class ManageMethods {
         UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         if (usm == null) return null;
         long endTime = System.currentTimeMillis();
-        long beginTime = endTime - 1000;
-        List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, beginTime, endTime);
-        if (stats != null && !stats.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                stats.sort((a, b) -> Long.compare(b.getLastTimeUsed(), a.getLastTimeUsed()));
+        long beginTime = endTime - 60000;
+        UsageEvents events = usm.queryEvents(beginTime, endTime);
+        String foregroundPkg = null;
+        long lastTimeStamp = 0;
+        UsageEvents.Event event = new UsageEvents.Event();
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event);
+            if (event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                if (event.getTimeStamp() > lastTimeStamp) {
+                    lastTimeStamp = event.getTimeStamp();
+                    foregroundPkg = event.getPackageName();
+                }
             }
-            return stats.get(0).getPackageName();
         }
-        return null;
+        return foregroundPkg;
     }
 
     public static boolean hasUsageStatsPermission(Context context) {
