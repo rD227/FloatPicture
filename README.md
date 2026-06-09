@@ -60,12 +60,6 @@ UsageEvents events = usm.queryEvents(beginTime, endTime);
 // Iterate events for the most recent MOVE_TO_FOREGROUND
 ```
 
-**Why `queryEvents` instead of `queryUsageStats`?**
-- `queryUsageStats` returns daily-aggregated data — updates are batched by the system and may lag behind recent-task switches
-- `queryEvents` with `MOVE_TO_FOREGROUND` events reflects actual app transitions in real time
-
-The `NotificationService` (a foreground service) polls every 1.5 seconds and triggers show/hide for matching windows.
-
 **Permission required:** `PACKAGE_USAGE_STATS` — user grants via Settings → Usage Access.
 
 ---
