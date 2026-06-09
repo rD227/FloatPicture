@@ -6,6 +6,11 @@
 
 ---
 
+**some problems**
+
+It will cover on the input table..
+But it's still suitable for the app which needn't screen input such as YouTube or termux (use bluetooth keyboard)
+
 FloatPicture is an Android floating window app that lets you display any custom image as an overlay on your screen (GIF not supported).
 
 **Note: The [original repository](https://github.com/XFY9326/FloatPicture) is no longer maintained.**
