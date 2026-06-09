@@ -290,14 +290,30 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         for (int i = 0; i < appList.size(); i++) {
             names[i] = appList.get(i).name;
         }
+        int checkedIndex = -1;
+        if (!filter_app_package.isEmpty()) {
+            for (int i = 0; i < appList.size(); i++) {
+                if (appList.get(i).packageName.equals(filter_app_package)) {
+                    checkedIndex = i;
+                    break;
+                }
+            }
+        }
+        final int[] selectedIndex = {checkedIndex};
         new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.settings_picture_filter_app_dialog_title)
-                .setItems(names, (dialog, which) -> {
-                    filter_app_package = appList.get(which).packageName;
-                    filter_app_name = appList.get(which).name;
-                    floatImageView.setFilterAppPackage(filter_app_package);
-                    updateFilterAppSummary(preference);
+                .setSingleChoiceItems(names, checkedIndex, (dialog, which) -> {
+                    selectedIndex[0] = which;
                 })
+                .setPositiveButton(R.string.done, (dialog, which) -> {
+                    if (selectedIndex[0] >= 0) {
+                        filter_app_package = appList.get(selectedIndex[0]).packageName;
+                        filter_app_name = appList.get(selectedIndex[0]).name;
+                        floatImageView.setFilterAppPackage(filter_app_package);
+                        updateFilterAppSummary(preference);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
