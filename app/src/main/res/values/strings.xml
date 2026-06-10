@@ -57,6 +57,9 @@
     <string name="error_picture_not_found">Can\'t find picture temp!</string>
     <string name="settings_picture_alpha">Set picture transparency</string>
     <string name="settings_picture_alpha_sum">Have transparent effects for regular pictures.</string>
+    <string name="settings_picture_darken">Set picture darken</string>
+    <string name="settings_picture_darken_sum">Reduce the brightness of the picture, like covering with a dark overlay.</string>
+    <string name="darken_amount">Darken:</string>
     <string name="transparency">Transparency:</string>
     <string name="settings_number_warn">Please input a correct number!</string>
     <string name="settings_picture_degree">Set picture show degree</string>

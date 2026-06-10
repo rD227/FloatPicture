@@ -53,6 +53,8 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
     private float picture_degree_temp;
     private float picture_alpha;
     private float picture_alpha_temp;
+    private float picture_darken;
+    private float picture_darken_temp;
     private int position_x;
     private int position_y;
     private int position_x_temp;
@@ -121,6 +123,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     position_y = pictureData.getInt(Config.DATA_PICTURE_POSITION_Y, Config.DATA_DEFAULT_PICTURE_POSITION_Y);
                     picture_degree = pictureData.getFloat(Config.DATA_PICTURE_DEGREE, Config.DATA_DEFAULT_PICTURE_DEGREE);
                     picture_alpha = pictureData.getFloat(Config.DATA_PICTURE_ALPHA, Config.DATA_DEFAULT_PICTURE_ALPHA);
+                    picture_darken = pictureData.getFloat(Config.DATA_PICTURE_DARKEN, Config.DATA_DEFAULT_PICTURE_DARKEN);
                     touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
                     allow_picture_over_layout = pictureData.getBoolean(Config.DATA_ALLOW_PICTURE_OVER_LAYOUT, Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT);
                     fill_screen = pictureData.getBoolean(Config.DATA_PICTURE_FILL_SCREEN, Config.DATA_DEFAULT_PICTURE_FILL_SCREEN);
@@ -131,6 +134,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     default_zoom = ImageMethods.getDefaultZoom(requireContext(), bitmap, false);
                     zoom = pictureData.getFloat(Config.DATA_PICTURE_ZOOM, default_zoom);
                     floatImageView = ImageMethods.getFloatImageViewById(requireContext(), PictureId);
+                    floatImageView.setDarken(picture_darken);
                 } else {
                     //New
                     PictureId = ImageMethods.setNewImage(getActivity(), intent.getData());
@@ -139,6 +143,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     position_x = Config.DATA_DEFAULT_PICTURE_POSITION_X;
                     position_y = Config.DATA_DEFAULT_PICTURE_POSITION_Y;
                     picture_alpha = Config.DATA_DEFAULT_PICTURE_ALPHA;
+                    picture_darken = Config.DATA_DEFAULT_PICTURE_DARKEN;
                     picture_degree = Config.DATA_DEFAULT_PICTURE_DEGREE;
                     touch_and_move = Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE;
                     allow_picture_over_layout = Config.DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT;
@@ -151,6 +156,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
                     zoom = default_zoom;
                     floatImageView = ImageMethods.createPictureView(requireContext(), bitmap, touch_and_move, allow_picture_over_layout, zoom, picture_degree);
                     floatImageView.setAlpha(picture_alpha);
+                    floatImageView.setDarken(picture_darken);
                     floatImageView.setPictureId(PictureId);
                 }
                 alertDialog.cancel();
@@ -178,6 +184,10 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         });
         requirePreference(Config.PREFERENCE_PICTURE_ALPHA).setOnPreferenceClickListener(preference -> {
             setPictureAlpha();
+            return true;
+        });
+        requirePreference(Config.PREFERENCE_PICTURE_DARKEN).setOnPreferenceClickListener(preference -> {
+            setPictureDarken();
             return true;
         });
         CheckBoxPreference preference_touch_and_move = findPreference(Config.PREFERENCE_PICTURE_TOUCH_AND_MOVE);
@@ -563,6 +573,55 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         dialog.show();
     }
 
+    private void setPictureDarken() {
+        View mView = inflater.inflate(R.layout.dialog_set_size, requireActivity().findViewById(R.id.layout_dialog_set_size));
+        AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
+        dialog.setTitle(R.string.settings_picture_darken);
+        dialog.setCancelable(false);
+        TextView name = mView.findViewById(R.id.textview_set_size);
+        name.setText(R.string.darken_amount);
+        final SeekBar seekBar = mView.findViewById(R.id.seekbar_set_size);
+        seekBar.setMax(100);
+        seekBar.setProgress((int) (picture_darken * 100));
+        final EditText editText = mView.findViewById(R.id.edittext_set_size);
+        editText.setText(String.valueOf(picture_darken));
+        picture_darken_temp = picture_darken;
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                picture_darken_temp = ((float) progress) / 100;
+                editText.setText(String.valueOf(picture_darken_temp));
+                floatImageView.setDarken(picture_darken_temp);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            float edittext_temp = Float.parseFloat(v.getText().toString());
+            if (edittext_temp >= 0 && edittext_temp <= 1) {
+                picture_darken_temp = edittext_temp;
+                seekBar.setProgress((int) (picture_darken_temp * 100));
+                floatImageView.setDarken(picture_darken_temp);
+            } else {
+                Toast.makeText(getActivity(), R.string.settings_number_warn, Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        });
+        dialog.setPositiveButton(R.string.done, (__, which) -> {
+            picture_darken = picture_darken_temp;
+            floatImageView.setDarken(picture_darken);
+        });
+        dialog.setNegativeButton(R.string.cancel, (__, which) -> floatImageView.setDarken(picture_darken));
+        dialog.setView(mView);
+        dialog.show();
+    }
+
     private void setPicturePosition() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         final boolean touchable_edit = (touch_and_move || sharedPreferences.getBoolean(Config.PREFERENCE_TOUCHABLE_POSITION_EDIT, false));
@@ -738,6 +797,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         pictureData.put(Config.DATA_PICTURE_ZOOM, zoom);
         pictureData.put(Config.DATA_PICTURE_DEFAULT_ZOOM, default_zoom);
         pictureData.put(Config.DATA_PICTURE_ALPHA, picture_alpha);
+        pictureData.put(Config.DATA_PICTURE_DARKEN, picture_darken);
         if (touch_and_move) {
             position_x = (int) floatImageView.getMovedPositionX();
             position_y = (int) floatImageView.getMovedPositionY();
@@ -775,6 +835,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
         } else {
             float original_zoom = pictureData.getFloat(Config.DATA_PICTURE_ZOOM, zoom);
             float original_alpha = pictureData.getFloat(Config.DATA_PICTURE_ALPHA, picture_alpha);
+            float original_darken = pictureData.getFloat(Config.DATA_PICTURE_DARKEN, picture_darken);
             float original_degree = pictureData.getFloat(Config.DATA_PICTURE_DEGREE, picture_degree);
             int original_position_x = pictureData.getInt(Config.DATA_PICTURE_POSITION_X, position_x);
             int original_position_y = pictureData.getInt(Config.DATA_PICTURE_POSITION_Y, position_y);
@@ -785,6 +846,7 @@ public class PictureSettingsFragment extends PreferenceFragmentCompat {
             String original_filter_app_package = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_PACKAGE, Config.DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE);
             String original_filter_app_name = pictureData.getString(Config.DATA_PICTURE_FILTER_APP_NAME, Config.DATA_DEFAULT_PICTURE_FILTER_APP_NAME);
             floatImageView.setAlpha(original_alpha);
+            floatImageView.setDarken(original_darken);
             floatImageView.setOverLayout(original_allow_picture_over_layout);
             floatImageView.setMoveable(original_touch_and_move);
             floatImageView.setFillScreen(original_fill_screen);

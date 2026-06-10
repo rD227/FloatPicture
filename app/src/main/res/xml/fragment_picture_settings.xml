@@ -37,6 +37,13 @@
             app:singleLine="true"
             app:summary="@string/settings_picture_alpha_sum"
             app:title="@string/settings_picture_alpha" />
+        <Preference
+            android:selectAllOnFocus="true"
+            app:iconSpaceReserved="false"
+            app:key="settings_picture_darken"
+            app:singleLine="true"
+            app:summary="@string/settings_picture_darken_sum"
+            app:title="@string/settings_picture_darken" />
         <CheckBoxPreference
             android:selectAllOnFocus="true"
             app:disableDependentsState="true"

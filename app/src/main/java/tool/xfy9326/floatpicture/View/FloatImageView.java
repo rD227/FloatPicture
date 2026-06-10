@@ -2,6 +2,8 @@ package tool.xfy9326.floatpicture.View;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
@@ -18,6 +20,7 @@ public class FloatImageView extends AppCompatImageView {
     private boolean fillScreen = false;
     private boolean filterAppEnabled = false;
     private String filterAppPackage = "";
+    private float darken = 0f;
 
     private float mTouchStartX = 0;
     private float mTouchStartY = 0;
@@ -80,6 +83,26 @@ public class FloatImageView extends AppCompatImageView {
 
     public String getFilterAppPackage() {
         return filterAppPackage;
+    }
+
+    public void setDarken(float darken) {
+        this.darken = darken;
+        if (darken <= 0f) {
+            clearColorFilter();
+        } else {
+            float scale = 1.0f - darken;
+            ColorMatrix colorMatrix = new ColorMatrix(new float[]{
+                    scale, 0, 0, 0, 0,
+                    0, scale, 0, 0, 0,
+                    0, 0, scale, 0, 0,
+                    0, 0, 0, 1, 0,
+            });
+            setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        }
+    }
+
+    public float getDarken() {
+        return darken;
     }
 
     @SuppressLint("ClickableViewAccessibility")

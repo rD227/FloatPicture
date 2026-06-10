@@ -32,6 +32,7 @@ public class Config {
     public final static String DATA_PICTURE_FILL_SCREEN = "FILL_SCREEN";
     public final static String DATA_PICTURE_FILTER_APP_ENABLED = "FILTER_APP_ENABLED";
     public final static String DATA_PICTURE_FILTER_APP_PACKAGE = "FILTER_APP_PACKAGE";
+    public final static String DATA_PICTURE_DARKEN = "DARKEN";
     public final static String DATA_PICTURE_FILTER_APP_NAME = "FILTER_APP_NAME";
 
     public final static boolean DATA_DEFAULT_PICTURE_SHOW_ENABLED = true;
@@ -42,6 +43,7 @@ public class Config {
     public final static boolean DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE = false;
     public final static boolean DATA_DEFAULT_ALLOW_PICTURE_OVER_LAYOUT = false;
     public final static boolean DATA_DEFAULT_PICTURE_FILL_SCREEN = false;
+    public final static float DATA_DEFAULT_PICTURE_DARKEN = 0f;
     public final static boolean DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED = false;
     public final static String DATA_DEFAULT_PICTURE_FILTER_APP_PACKAGE = "";
     public final static String DATA_DEFAULT_PICTURE_FILTER_APP_NAME = "";
@@ -50,6 +52,7 @@ public class Config {
     public final static String PREFERENCE_ALLOW_PICTURE_OVER_LAYOUT = "settings_allow_picture_over_layout";
     public final static String PREFERENCE_PICTURE_RESIZE = "settings_picture_resize";
     public final static String PREFERENCE_PICTURE_ALPHA = "settings_picture_alpha";
+    public final static String PREFERENCE_PICTURE_DARKEN = "settings_picture_darken";
     public final static String PREFERENCE_PICTURE_POSITION = "settings_picture_position";
     public final static String PREFERENCE_PICTURE_DEGREE = "settings_picture_degree";
     public final static String PREFERENCE_PICTURE_TOUCH_AND_MOVE = "settings_picture_touchable_and_moveable";

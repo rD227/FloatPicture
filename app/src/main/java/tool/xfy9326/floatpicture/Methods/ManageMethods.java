@@ -56,6 +56,7 @@ public class ManageMethods {
         float zoom = pictureData.getFloat(Config.DATA_PICTURE_ZOOM, default_zoom);
         float picture_degree = pictureData.getFloat(Config.DATA_PICTURE_DEGREE, Config.DATA_DEFAULT_PICTURE_DEGREE);
         float picture_alpha = pictureData.getFloat(Config.DATA_PICTURE_ALPHA, Config.DATA_DEFAULT_PICTURE_ALPHA);
+        float picture_darken = pictureData.getFloat(Config.DATA_PICTURE_DARKEN, Config.DATA_DEFAULT_PICTURE_DARKEN);
         int position_x = pictureData.getInt(Config.DATA_PICTURE_POSITION_X, Config.DATA_DEFAULT_PICTURE_POSITION_X);
         int position_y = pictureData.getInt(Config.DATA_PICTURE_POSITION_Y, Config.DATA_DEFAULT_PICTURE_POSITION_Y);
         boolean touch_and_move = pictureData.getBoolean(Config.DATA_PICTURE_TOUCH_AND_MOVE, Config.DATA_DEFAULT_PICTURE_TOUCH_AND_MOVE);
@@ -71,6 +72,7 @@ public class ManageMethods {
         floatImageView.setFilterAppEnabled(filter_app_enabled);
         floatImageView.setFilterAppPackage(filter_app_package);
         floatImageView.setAlpha(picture_alpha);
+        floatImageView.setDarken(picture_darken);
         ImageMethods.saveFloatImageViewById(mContext, id, floatImageView);
         if (pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED)) {
             WindowsMethods.createWindow(windowManager, floatImageView, touch_and_move, over_layout, position_x, position_y);
