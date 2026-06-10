@@ -75,8 +75,7 @@ public class ManageListAdapter extends AdvancedRecyclerView.Adapter<ManageListVi
             PictureData pictureData1 = new PictureData();
             pictureData1.setDataControl(mPictureId);
             boolean isShown = pictureData1.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED);
-            boolean filterEnabled = pictureData1.getBoolean(Config.DATA_PICTURE_FILTER_APP_ENABLED, Config.DATA_DEFAULT_PICTURE_FILTER_APP_ENABLED);
-            if (isShown || filterEnabled) {
+            if (isShown) {
                 Intent intent = new Intent(mActivity, PictureSettingsActivity.class);
                 intent.putExtra(Config.INTENT_PICTURE_EDIT_MODE, true);
                 intent.putExtra(Config.INTENT_PICTURE_EDIT_ID, mPictureId);
