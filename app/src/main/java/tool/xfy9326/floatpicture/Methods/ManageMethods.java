@@ -125,10 +125,12 @@ public class ManageMethods {
         pictureData.setDataControl(id);
         boolean data_visible = pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, visible);
         if (visible) {
-            if (!data_visible && shouldShowFilteredWindow(context, pictureData, id)) {
-                showWindowById(context, id);
+            if (!data_visible) {
                 pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, true);
                 pictureData.commit(null);
+                if (shouldShowFilteredWindow(context, pictureData, id)) {
+                    showWindowById(context, id);
+                }
             }
         } else {
             if (data_visible) {
@@ -213,15 +215,12 @@ public class ManageMethods {
                     String filterPackage = floatImageView.getFilterAppPackage();
                     boolean shouldShow = filterPackage.equals(foregroundPackage);
                     pictureData.setDataControl(id);
-                    boolean isShown = pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED);
-                    if (shouldShow && !isShown && mainApplication.getWinVisible()) {
+                    boolean userWantsShown = pictureData.getBoolean(Config.DATA_PICTURE_SHOW_ENABLED, Config.DATA_DEFAULT_PICTURE_SHOW_ENABLED);
+                    boolean isAttached = floatImageView.isAttachedToWindow();
+                    if (shouldShow && userWantsShown && !isAttached && mainApplication.getWinVisible()) {
                         showWindowById(context, id);
-                        pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, true);
-                        pictureData.commit(null);
-                    } else if (!shouldShow && isShown) {
+                    } else if (!shouldShow && isAttached) {
                         hideWindowById(context, id);
-                        pictureData.put(Config.DATA_PICTURE_SHOW_ENABLED, false);
-                        pictureData.commit(null);
                     }
                 }
             }
